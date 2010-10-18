@@ -36,7 +36,7 @@ sub register {
     $app->renderer->add_helper(
         dummy_input => sub {
             shift->helper(
-                'input' => $dummy_input => value => 'dummy' => style =>
+                'input' => $dummy_input => value => '' => style =>
                   'display:none');
         }
     );
@@ -113,7 +113,7 @@ sub register {
 
             # Bot filled out a dummy input
             $bot_detected_cb->($c, 'Dummy input submitted'), return
-              if ($c->param($dummy_input) || '') ne '';
+              if $c->param($dummy_input);
 
             # No chance for the bot without cookies
             $bot_detected_cb->($c, 'No cookies'), return
