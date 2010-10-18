@@ -113,7 +113,7 @@ sub register {
 
             # Bot filled out a dummy input
             $bot_detected_cb->($c, 'Dummy input submitted'), return
-              if $c->param($dummy_input);
+              if ($c->param($dummy_input) || '') ne '';
 
             # No chance for the bot without cookies
             $bot_detected_cb->($c, 'No cookies'), return
