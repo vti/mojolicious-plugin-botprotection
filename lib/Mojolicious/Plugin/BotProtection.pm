@@ -83,9 +83,9 @@ sub register {
             $c->helper(
                 'tag' => 'form' => action => $c->url_for($name, $captures),
                 @_    => sub {
-                    $c->helper('signature_input')
-                      . $c->helper('dummy_input')
-                      . $cb->($c);
+                    join(   "\n" => $c->helper('signature_input')
+                          . $c->helper('dummy_input')
+                          . $cb->($c));
                 }
             );
         }
