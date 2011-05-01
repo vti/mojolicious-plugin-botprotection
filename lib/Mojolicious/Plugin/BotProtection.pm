@@ -3,6 +3,8 @@ package Mojolicious::Plugin::BotProtection;
 use strict;
 use warnings;
 
+our $VERSION = "0.1";
+
 use base 'Mojolicious::Plugin';
 
 use Mojo::ByteStream;
@@ -17,37 +19,28 @@ sub register {
     # Dummy input configuration
     my $dummy_input = $conf->{dummy_input} || 'dummy';
 
-    $app->renderer->add_helper(
-        dummy_input => sub {
-            shift->helper('input_tag' => $dummy_input => value => '' => style =>
-                  'display:none');
-        }
-    );
+    # Helper for a dummy input field
+    $app->helper(dummy_input => sub {
+        shift->input_tag($dummy_input, value => '', style => 'display:none');
+    });
 
-    $app->renderer->add_helper(
-        signed_form_for => sub {
-            my $c    = shift;
-            my $name = shift;
+    $app->helper(signed_form_for => sub {
+        my $c    = shift;
+        my $name = shift; # need next @_ values later
 
-            # Captures
-            my $captures = ref $_[0] eq 'HASH' ? shift : {};
+        # Captures
+        my $captures = ref $_[0] eq 'HASH' ? shift : {};
 
-            my $url = $c->url_for($name, $captures);
+        my $url = $c->url_for($name, $captures);
 
-            $c->session(
-                form_signature => join(
-                    ',' => "time=" . time,
-                    "url=" . $url->to_abs
-                )
-            );
+        my $form_signature = join(',' => 'time=' . time, 'url=' . $url->to_abs);
+        $c->session(form_signature => $form_signature);
 
-            my $cb = pop;
-            $c->helper(
-                'tag' => 'form' => action => $url,
-                @_ => sub { $c->helper('dummy_input') . $cb->($c); }
-            );
-        }
-    );
+        my $cb = pop;
+        $c->tag(form => action => $url, @_,
+            sub { $c->dummy_input . $cb->($c); }
+        );
+    });
 
     $app->plugins->add_hook(
         after_static_dispatch => sub {
@@ -60,7 +53,7 @@ sub register {
 
             # No GET params within POST are allowed
             return $bot_detected_cb->($c, 'POST with GET')
-              if $c->req->url->query;
+              if $c->req->url->query->to_string;
 
             # Bot filled out a dummy input
             return $bot_detected_cb->($c, 'Dummy input submitted')
