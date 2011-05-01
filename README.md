@@ -28,4 +28,13 @@ the request came from a bot. You can customize that (and more):
         },
     };
 
+AUTHOR AND LICENSE
+------------------
+
+Copyright (C) 2011 Viacheslav Tykhanovskyi ([viacheslav.t@gmail.com][vtimail])
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
 [mojo]: http://mojolicio.us/
+[vtimail]: mailto:viacheslav.t@gmail.com
